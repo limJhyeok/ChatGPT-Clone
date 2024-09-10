@@ -9,6 +9,9 @@ class ChatSessionCreate(BaseModel):
 class ChatSessionCreateRequest(BaseModel):
     title: str
 
+class ChatSessionUpdateRequest(BaseModel):
+    renamed_title: str
+
 
 class ConversationCreate(BaseModel):
     chat_session_id: int
