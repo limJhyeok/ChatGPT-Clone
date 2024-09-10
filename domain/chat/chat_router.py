@@ -69,6 +69,19 @@ def create_chat(chat_session_create_request: chat_schema.ChatSessionCreateReques
         chat_session_create = chat_session_create
     )
 
+@router.put("/rename/{chat_session_id}")
+def update_chat(chat_session_id: int,
+    chat_session_update_request: chat_schema.ChatSessionUpdateRequest,
+    db: Session = Depends(get_db)):
+    chat_crud.update_chat_session(
+        db,
+        chat_session_id,
+        chat_session_update_request
+    )
+
+@router.delete("/delete/{chat_session_id}")
+def delete_chat(chat_session_id: int, db: Session = Depends(get_db)):
+    chat_crud.delete_chat_session(db, chat_session_id)
 
 @router.post("/session", status_code=status.HTTP_201_CREATED)
 def post_user_conversation(user_chat_session_create_request: chat_schema.UserChatSessionCreateRequest,
