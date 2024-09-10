@@ -22,7 +22,7 @@
 
   function closeNewChatModal() {
     isNewChatModalOpen = false;
-    newChatTitle = "";
+    newChatTitle = '';
   }
 
   function sendMessage() {
@@ -223,24 +223,23 @@
   function deleteChat(chatId){
     openCheckDeleteChatModal(chatId);
   }
-  function renameChatTitle(chatId) {
-    let url = `/api/chat/${chatId}/rename`;  // TODO: url 및 inDTO 변경
-    let params = { name: newChatTitle };     
-    // fastapi('put', url, params,
-    //   (json) => {
-    //     console.log("Chat title updated:", json);
-    //     chatTitles.update(titles => titles.map(title => {
-    //       if (title.id === chatId) {
-    //         return { ...title, name: newChatTitle };  // 제목을 새로 입력된 값으로 업데이트
-    //       }
-    //       return title;
-    //     }));
-    //     editingChatId = null;  // 수정 완료 후 상태 초기화
-    //   },
-    //   (json_error) => {
-    //     console.error("Error updating chat title:", json_error);
-    //   }
-    // );
+  function renameChatTitle(chatTitle) {
+    if (newChatTitle.trim() === '' || newChatTitle === chatTitle.name) {
+      return
+    }
+    let url = `/api/chat/rename/${chatTitle.id}`;  // TODO: url 및 inDTO 변경
+    let params = { renamed_title: newChatTitle };
+    
+    fastapi('put', url, params,
+      (json) => {
+        editingChatTitleId = null;
+        newChatTitle='';
+        getChatTitles();
+      },
+      (json_error) => {
+        console.error("Error updating chat title:", json_error);
+      }
+    );
   }
   function cancelEdit() {
     newChatTitle = '';
@@ -249,32 +248,32 @@
     
   }
 
-  function handleKeyPress(event, chatId) {
+  function handleKeyPress(event, chatTitle) {
     if (event.key === 'Enter') {
-      renameChatTitle(chatId);
+      renameChatTitle(chatTitle);
+      cancelEdit();
     } else if (event.key === 'Escape') {
       cancelEdit();
     } 
   }
   
   function confirmDeleteChat() {
-    let url = `/api/chat/${selectedChatId}`  
+    let url = `/api/chat/delete/${selectedChatId}`  
     let params = {}  
-    // TODO: backend(url 및 inDTO 변경) 호출
 
-    // fastapi('delete', url, params,
-    //   (json) => {
-    //     console.log("Chat deleted:", json);
-    //     // 삭제 후 채팅 목록 갱신
-    //     chatTitles.update(titles => titles.filter(title => title.id !== selectedChatId));
-    //     closeCheckDeleteChatModal();
-    //   },
-    //   (json_error) => {
-    //     error = json_error;
-    //     console.log("Error deleting chat:", error);
-    //     closeCheckDeleteChatModal();
-    //   }
-    // );
+    fastapi('delete', url, params,
+      (json) => { 
+        selectedChatId = null;
+        activeChatSessionId = -1;
+        closeCheckDeleteChatModal();
+        getChatTitles();
+      },
+      (json_error) => {
+        error = json_error;
+        selectedChatId = null;
+        closeCheckDeleteChatModal();
+      }
+    );
   }
   let activePopupId = null
   let popupContainer;
@@ -581,7 +580,7 @@
               type="text" 
               class="form-control"
               bind:value={newChatTitle}
-              on:keydown={(event) => handleKeyPress(event, chatTitle.id)}
+              on:keydown={(event) => handleKeyPress(event, chatTitle)}
               on:blur={(cancelEdit)}  
               placeholder={chatTitle.name}
             />
