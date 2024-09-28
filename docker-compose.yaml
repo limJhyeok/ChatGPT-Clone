@@ -55,6 +55,11 @@ services:
           - driver: nvidia
             device_ids: ['0']
             capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/util/health-check/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 
   frontend:
