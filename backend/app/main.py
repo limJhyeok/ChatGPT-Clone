@@ -1,5 +1,4 @@
-from app.api.routes import user_router
-from app.api.routes import chat_router
+from app.api.routes import user_router, chat_router, util_router
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -24,7 +23,7 @@ app.add_middleware(
 
 app.include_router(user_router.router)
 app.include_router(chat_router.router)
-
+app.include_router(util_router.router)
 # @app.get("/")
 # def index():
 #   return FileResponse("frontend/dist/index.html")
