@@ -45,9 +45,12 @@ jobs:
           echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-
-      - name: Debug with SSH
-        uses: mxschmitt/action-tmate@v3
+          echo "----------------------------------------"
+          echo "🔍 .env 파일 생성 결과 확인:"
+          cat .env
+          echo "----------------------------------------"
+          echo "📁 현재 디렉토리 구조:"
+          ls -al
 
       - run: docker compose up -d db backend
       - run: docker compose exec -T backend poetry install --no-root
