@@ -1,0 +1,74 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Create .env file
+        run: |
+          echo "PROJECT_NAME=${{ secrets.PROJECT_NAME }}" >> .env
+          echo "STACK_NAME=${{ secrets.STACK_NAME }}" >> .env
+          echo "DOMAIN=${{ secrets.DOMAIN }}" >> .env
+          echo "VITE_SERVER_URL=${{ secrets.VITE_SERVER_URL }}" >> .env
+          echo "VITE_EEVE_SERVER_URL=${{ secrets.VITE_EEVE_SERVER_URL }}" >> .env
+          echo "BACKEND_CORS_ORIGINS=${{ secrets.BACKEND_CORS_ORIGINS }}" >> .env
+          echo "DOMAIN_PORT=${{ secrets.DOMAIN_PORT }}" >> .env
+          echo "USE_HASH_ROUTER=${{ secrets.USE_HASH_ROUTER }}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMPT_PORT=${{ secrets.SMPT_PORT }}" >> .env
+          echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
+          echo "SMPT_PASSWORD=${{ secrets.SMPT_PASSWORD }}" >> .env
+          echo "EMAILS_FROM_EMAIL=${{ secrets.EMAILS_FROM_EMAIL }}" >> .env
+          echo "EMAILS_FROM_NAME=${{ secrets.EMAILS_FROM_NAME }}" >> .env
+          echo "POSTGRES_SERVER=${{ secrets.POSTGRES_SERVER }}" >> .env
+          echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+
+      - run: docker compose build adminer backend frontend proxy
+      - run: docker compose down -v --remove-orphans
+      - run: docker compose up -d adminer backend frontend proxy
+      - run: docker compose exec -T backend poetry install --no-root
+      - name: Lint
+        run: docker compose exec -T backend bash /app/scripts/format.sh
+      - name: Run tests
+        run: docker compose exec -T backend bash /app/scripts/test.sh
+      - run: docker compose down -v --remove-orphans
+      - name: Store coverage files
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: backend/htmlcov
+
+  # https://github.com/marketplace/actions/alls-green#why
+  alls-green:  # This job does nothing and is only used for the branch protection
+    if: always()
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
