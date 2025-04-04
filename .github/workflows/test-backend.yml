@@ -35,9 +35,9 @@ jobs:
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
           echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
           echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
-          echo "SMPT_PORT=${{ secrets.SMPT_PORT }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
           echo "SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .env
-          echo "SMPT_PASSWORD=${{ secrets.SMPT_PASSWORD }}" >> .env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
           echo "EMAILS_FROM_EMAIL=${{ secrets.EMAILS_FROM_EMAIL }}" >> .env
           echo "EMAILS_FROM_NAME=${{ secrets.EMAILS_FROM_NAME }}" >> .env
           echo "POSTGRES_SERVER=${{ secrets.POSTGRES_SERVER }}" >> .env
